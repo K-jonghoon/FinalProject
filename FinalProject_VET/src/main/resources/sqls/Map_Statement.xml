@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.min.edu.model.mapper.Map_DaoImpl">
+
+	<resultMap type="com.min.edu.vo.Users_VO" id="Users_VO">
+		<result column="USERS_ID" property="users_id"/>
+		<result column="USERS_PW" property="users_pw"/>
+		<result column="USERS_NAME" property="users_name"/>
+		<result column="USERS_TEL" property="users_tel"/>
+		<result column="USERS_STATUS" property="users_status"/>
+		<result column="USERS_JOINDATE" property="users_joindate"/>
+		<result column="USERS_ADDR" property="users_addr"/>
+		<result column="USERS_SUBTEL" property="users_subtel"/>
+		<result column="USERS_AUTH" property="users_auth"/>
+		<result column="USERS_CRN" property="users_crn"/>
+		<collection property="hospital_vo" resultMap="Hospital_VO"/>
+	</resultMap>
+	<resultMap type="com.min.edu.vo.Hospital_VO" id="Hospital_VO">
+		<result column="HOSP_ID" property="hosp_id"/>
+		<result column="HOSP_NAME" property="hosp_name"/>
+		<result column="HOSP_TIME" property="hosp_time"/>
+		<result column="HOSP_OFF" property="hosp_off"/>
+		<result column="HOSP_PARK" property="hosp_park"/>
+		<result column="HOSP_ETC" property="hosp_etc"/>
+	</resultMap>
+	
+	<!-- 동물코드 조인 -->
+	<resultMap type="com.min.edu.vo.AnimalConn_VO" id="AnimalConn_VO">
+		<result column="ANM_CODE" property="anm_code"/>
+		<result column="HOSP_ID" property="hosp_id"/>
+		<collection property="animalcode_vo" resultMap="AnimalCode_VO"/>
+	</resultMap>
+	<resultMap type="com.min.edu.vo.AnimalCode_VO" id="AnimalCode_VO">
+		<result column="ANM_CODE" property="anm_code"/>
+		<result column="ANM_SPECIES" property="anm_species"/>
+	</resultMap>
+
+	<!-- 진료과목 조인 -->
+	<resultMap type="com.min.edu.vo.MediConn_VO" id="MediConn_VO">
+		<result column="MEDI_CODE" property="medi_code"/>
+		<result column="HOSP_ID" property="hosp_id"/>
+		<collection property="medicode_vo" resultMap="MediCode_VO"/>
+	</resultMap>
+	<resultMap type="com.min.edu.vo.MediCode_VO" id="MediCode_VO">
+		<result column="MEDI_CODE" property="medi_code"/>
+		<result column="MEDI_NAME" property="medi_name"/>
+		<result column="MEDI_TOP" property="medi_top"/>
+	</resultMap>
+	
+	<select id="hosp_user" resultType="Users_VO">
+		SELECT USERS_ID , USERS_NAME , USERS_TEL , USERS_ADDR
+			FROM USERSINFO u
+			WHERE USERS_AUTH = #{users_auth}
+	</select>
+
+	
+	<!-- 병원 상세조회 -->
+	<select id="hosp_detail" resultMap="Users_VO">
+		SELECT u.USERS_ID , u.USERS_TEL , u.USERS_ADDR , u.USERS_SUBTEL , u.USERS_CRN,
+				h.HOSP_NAME, h.HOSP_TIME , h.HOSP_OFF , h.HOSP_PARK , 
+				h.HOSP_ETC , h.HOSP_MNG , h.HOSP_ID 
+			FROM USERSINFO u JOIN HOSPITAL h 
+				ON u.USERS_ID = h.HOSP_ID 
+			WHERE USERS_ID = #{users_id}
+	</select>
+	
+	<!-- 병원 상세조회 진료동물 -->
+	<select id="hosp_anm" resultMap="AnimalConn_VO">
+		SELECT a.ANM_CODE , a2.ANM_SPECIES 
+			FROM ANIMALCONNECT a JOIN ANIMALCODE a2 
+				ON a.ANM_CODE = a2.ANM_CODE
+			WHERE a.HOSP_ID = #{hosp_id}
+			ORDER BY a.ANM_CODE ASC
+	</select>
+	
+	<!-- 병원 상세조회 진료과목 -->
+	<select id="hosp_mediDept" resultMap="MediConn_VO">
+		SELECT m.MEDI_CODE , m2.MEDI_NAME 
+			FROM MEDICONNECT m JOIN MEDICODE m2 
+				ON m.MEDI_CODE  = m2.MEDI_CODE 
+			WHERE m.HOSP_ID = #{hosp_id}
+			ORDER BY MEDI_CODE ASC
+	</select>
+	
+	<!-- 지도의 마커찍힌 주소 가져와서 병원의 아이디 호출 -->
+	<select id="map_reqAddr" resultType="java.lang.String">
+		SELECT USERS_ID 
+			FROM USERSINFO u 
+			WHERE USERS_ADDR LIKE '%' || #{users_addr} || '%'
+	</select>
+	
+	<select id="map_Sido" resultType="com.min.edu.vo.MapRegion_VO">
+		SELECT SI_DO 
+			FROM REGION_DATA rd 
+			GROUP BY SI_DO
+	</select>
+	
+	<select id="map_SiGunGu" resultType="com.min.edu.vo.MapRegion_VO">
+		SELECT SI_GUN_GU 
+			FROM REGION_DATA rd 
+			WHERE SI_DO = #{si_do}
+	</select>
+	
+	<select id="map_RegionData" resultType="com.min.edu.vo.NationwideHospital_VO">
+		SELECT 소재지전체주소 , 사업장명
+			FROM HOSPITAL_DATA hd 
+			WHERE 도로명전체주소 LIKE #{si_do} || ' ' || #{si_gun_gu} || '%'
+	</select>
+	
+</mapper>

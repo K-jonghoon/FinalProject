@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd" >
+<configuration>
+  
+<typeAliases>
+	<typeAlias type="com.min.edu.vo.Reservation_VO" alias="Reservation_VO"/>
+	<typeAlias type="com.min.edu.vo.QuestBoard_VO" alias="QuestBoard_VO"/>
+	<typeAlias type="com.min.edu.vo.ReplyBoard_VO" alias="ReplyBoard_VO"/>
+	<typeAlias type="com.min.edu.vo.Users_VO" alias="Users_VO"/>
+</typeAliases>
+
+<mappers>
+	<mapper resource="sqls/MediChart_Statement.xml"/>
+ 	<mapper resource="sqls/Reservation_Statement.xml"/>
+ 	<mapper resource="sqls/Users_Statement.xml"/>
+   	<mapper resource="sqls/QuestionBoard_Statement.xml"/>
+   	<mapper resource="sqls/Map_Statement.xml"/>
+   	<mapper resource="sqls/Schedule_Statement.xml"/>
+   	<mapper resource="sqls/Payment_Statement.xml"/>
+   	<mapper resource="sqls/Notice_Statement.xml"/>
+   	<mapper resource="sqls/BookMark_Statement.xml"/>
+   	<mapper resource="sqls/Chosen_Statement.xml"/>
+</mappers>
+
+</configuration>

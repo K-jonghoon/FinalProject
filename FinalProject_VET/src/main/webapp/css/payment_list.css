@@ -1,0 +1,84 @@
+@charset "UTF-8";
+#chartInfo{
+	margin: 20px auto;
+	width: 100%;
+	border-collapse: collapse;
+	border-radius: 3px;
+}
+
+#chartInfo th,tr,td{
+	padding: 8px;
+	text-align: center;
+ 	border-bottom: 1px solid #3E2723;
+ 	font-size: 15px;
+}
+
+#chartInfo th{
+	background-color:  #BCAAA4;
+	font-style:  #3E2723;
+}
+
+#cacelpay{
+	background-color: #D7CCC8;
+	width: 110px;
+	height: 20px;
+	border-radius: 5px;
+	font: #3E2723;
+	border: none;
+	box-shadow: 1.5px 1.5px 1.5px 0 #3E2723;
+	margin-left: 220px;
+}
+
+#cacelpay:hover{
+	background-color:  #BCAAA4;
+}
+
+#cacelpay2{
+	background-color: #D7CCC8;
+	width: 110px;
+	height: 20px;
+	border-radius: 5px;
+	font: #3E2723;
+	border: none;
+	box-shadow: 1.5px 1.5px 1.5px 0 #3E2723;
+	margin-left: 10px;
+}
+#cacelpay2:hover{
+	background-color:  #BCAAA4;
+}
+
+#paymentBtn{
+	background-color: #D7CCC8;
+	width: 110px;
+	height: 20px;
+	border-radius: 5px;
+	font: #3E2723;
+	border: none;
+	box-shadow: 1.5px 1.5px 1.5px 0 #3E2723;
+	float: right;
+	margin-right: 20px;
+}
+
+#paymentBtn:hover{
+	background-color:  #BCAAA4;
+}
+
+#listname{
+	margin-top: 0px;
+	padding-top: 30px;
+	text-align: center;
+}
+
+#point_list{
+	float : right;
+	padding-right: 20px;
+}
+
+#allPoint{
+	color:#1000E5;
+}
+
+#buttonPart{
+	float: right;
+	margin-right: 20px;
+}

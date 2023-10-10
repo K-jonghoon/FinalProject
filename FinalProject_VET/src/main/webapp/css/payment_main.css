@@ -1,0 +1,23 @@
+@charset "UTF-8";
+.mileage{
+	width: 350px;
+	height: 200px;
+	margin: 25px;
+	float: left;
+	border-radius: 20px;
+	background-color: #EFEBE9;
+	border: none;
+	cursor: pointer;
+	box-shadow: 8px 8px 8px 0px #BCAAA4;
+	font-size: 15px;
+}
+
+.mileage:hover{
+	background-color: #D7CCC8;
+}
+
+.mileageFont{
+	text-align: center;
+	padding: 60px;
+	color: #3E2723;
+}

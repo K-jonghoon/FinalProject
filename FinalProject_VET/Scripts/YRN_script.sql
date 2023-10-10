@@ -1,0 +1,32 @@
+SELECT COUNT(PET_SEQ) AS CNT
+	FROM PETSINFO
+	WHERE PET_OWNER ='elsa@disney.com';
+	
+--병원별 진료과목 조회 
+SELECT a.ANM_CODE ,a2.ANM_SPECIES 
+   FROM ANIMALCONNECT a JOIN ANIMALCODE a2
+   ON a.ANM_CODE = a2.ANM_CODE 
+   WHERE a.HOSP_ID ='gana@naver.com'; 
+
+--병원별 진료동물 조회
+SELECT m.MEDI_CODE, m2.MEDI_NAME  
+   FROM MEDICONNECT m JOIN MEDICODE m2 
+   ON m.MEDI_CODE = m2.MEDI_CODE 
+   WHERE m.HOSP_ID ='gana@naver.com';
+   
+--병원필수정보 / 상세정보 (병원이름, 전화번호, 주소, 전화번호2, 운영시간, 휴무일, 주차여부, 간단소개글)
+SELECT u.USERS_NAME , u.USERS_TEL , u.USERS_ADDR , u.USERS_SUBTEL, h.HOSP_TIME , h.HOSP_OFF , h.HOSP_PARK , h.HOSP_ETC 
+   FROM USERSINFO u
+   JOIN HOSPITAL h ON u.USERS_ID = h.HOSP_ID;
+  
+--병원필수정보 / 상세정보 (병원이름, 전화번호, 주소, 전화번호2, 운영시간, 휴무일, 주차여부, 간단소개글)
+SELECT u.USERS_NAME , u.USERS_TEL , u.USERS_ADDR , u.USERS_SUBTEL, h.HOSP_TIME , h.HOSP_OFF , h.HOSP_PARK , h.HOSP_ETC, a.ANM_CODE , a2.ANM_SPECIES , m.MEDI_CODE , m2.MEDI_NAME 
+   FROM USERSINFO u
+   JOIN HOSPITAL h ON u.USERS_ID = h.HOSP_ID
+   JOIN ANIMALCONNECT a ON h.HOSP_ID = a.HOSP_ID 
+   JOIN ANIMALCODE a2 ON a.ANM_CODE = a2.ANM_CODE 
+   JOIN MEDICONNECT m ON m.HOSP_ID = h.HOSP_ID 
+   JOIN MEDICODE m2 ON m.MEDI_CODE = m2.MEDI_CODE 
+   WHERE u.USERS_ID ='gana@naver.com';
+
+   

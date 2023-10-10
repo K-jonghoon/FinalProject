@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.min.edu.model.mapper.MediChart_DaoImpl">
+
+	<resultMap type="com.min.edu.vo.PetsInfo_VO" id="PetsVoMap">
+		<result column="PET_SEQ" property="pet_seq"/>
+		<result column="PET_OWNER" property="pet_owner"/>
+		<result column="PET_NAME" property="pet_name"/>
+		<result column="PET_BDAY" property="pet_bday"/>
+		<result column="PET_SPECIES" property="pet_species"/>
+		<result column="PET_GENDER" property="pet_gender"/>
+		<result column="PET_NEUT" property="pet_neut"/>
+		<result column="PET_REPORT" property="pet_report"/>
+		
+		<collection property="medichart_vo" resultMap="ChartVoMap"/>
+	</resultMap>
+	
+	<resultMap type="com.min.edu.vo.MediChart_VO" id="ChartVoMap">
+		<result column="MEDI_NUM" property="medi_num"/>
+		<result column="MPET_SEQ" property="mpet_seq"/>
+		<result column="MEDI_REGDATE" property="medi_regdate"/>
+		<result column="MEDI_VISIT" property="medi_visit"/>
+		<result column="MEDI_L" property="medi_l"/>
+		<result column="MEDI_S" property="medi_s"/>
+		<result column="MEDI_TITLE" property="medi_title"/>
+		<result column="MEDI_CONTENT" property="medi_content"/>
+		<result column="MEDI_ID" property="medi_id"/>
+		<result column="MEDI_DELFLAG" property="medi_delflag"/>
+		<result column="MEDI_LNAME" property="medi_lname"/>
+		<result column="MEDI_SNAME" property="medi_sname"/>
+		
+		
+		<collection property="fileboard_vo" resultMap="FileVoMap"/>
+		<collection property="medicode_vo" resultMap="MCVoMap"/>
+	</resultMap>
+
+	<resultMap type="com.min.edu.vo.FileBoard_VO" id="FileVoMap">
+		<result column="F_SEQ" property="f_seq"/>
+		<result column="F_REF" property="f_ref"/>
+		<result column="F_ORIGINNAME" property="f_originname"/>
+		<result column="F_STOREDNAME" property="f_storedname"/>
+		<result column="F_SIZE" property="f_size"/>
+		<result column="F_DELFLAG" property="f_delflag"/>
+	</resultMap>
+
+	<resultMap type="com.min.edu.vo.MediCode_VO" id="MCVoMap">
+		<result column="MEDI_CODE" property="medi_code"/>
+		<result column="MEDI_NAME" property="medi_name"/>
+		<result column="MEDI_TOP" property="medi_top"/>
+	</resultMap>
+	
+	<!-- 아이디별 반려동물 수 체크 -->
+	<select id="countPet" resultType="java.lang.Integer">
+		SELECT COUNT(PET_SEQ) AS CNT
+			FROM PETSINFO
+			WHERE PET_OWNER =#{id}
+	</select>
+	
+	<!-- 아이디별 반려동물 리스트 조회 -->
+	<select id="searchPet" resultType="com.min.edu.vo.PetsInfo_VO">
+		SELECT PET_NAME , PET_SEQ
+			FROM PETSINFO
+			WHERE PET_OWNER = #{pet_owner}
+	</select>
+
+	<!-- 새 반려동물 입력 -->
+	<insert id="insertNewPet" parameterType="com.min.edu.vo.PetsInfo_VO">
+	<selectKey keyProperty="pet_seq" resultType="java.lang.Integer" order="BEFORE">
+		SELECT NVL(MAX(PET_SEQ),0)+1 AS PET_SEQ FROM PETSINFO
+	</selectKey>
+		INSERT INTO PETSINFO
+			(PET_SEQ, PET_OWNER, PET_NAME, 
+			PET_BDAY, PET_SPECIES, PET_GENDER, 
+			PET_NEUT, PET_REPORT)
+			VALUES(#{pet_seq},#{pet_owner}, #{pet_name},
+					#{pet_bday}, #{pet_species}, #{pet_gender}, 
+					#{pet_neut}, #{pet_report})
+	</insert>
+
+	<!-- 반려동물 삭제 -->
+	<delete id="deletePet">
+		DELETE FROM PETSINFO
+			WHERE PET_SEQ=#{pet_seq}
+	</delete>
+	
+	<!-- 새 진료기록 입력 -->
+	<insert id="insertNewChart" parameterType="com.min.edu.vo.MediChart_VO">
+	<selectKey keyProperty="medi_num" resultType="java.lang.String" order="BEFORE">
+		SELECT 'M'|| (NVL(MAX(TO_NUMBER(SUBSTR(MEDI_NUM,2))),0)+1) FROM MEDICHART
+	</selectKey>
+		INSERT INTO MEDICHART
+			(MEDI_NUM,
+			MPET_SEQ, MEDI_REGDATE, MEDI_VISIT, 
+			MEDI_L, MEDI_S, MEDI_TITLE, 
+			MEDI_CONTENT, MEDI_ID, MEDI_DELFLAG)
+			VALUES(#{medi_num}
+					,#{mpet_seq}, (SYSDATE) ,#{medi_visit},
+					#{medi_l}, #{medi_s}, #{medi_title}, 
+					#{medi_content}, #{medi_id}, 'N')
+	</insert>
+	
+	<!-- 진료기록 maxSeq 조회 -->
+	<select id="getMaxSeq" resultType="java.lang.String">
+		SELECT 'M'|| MAX(TO_NUMBER(SUBSTR(MEDI_NUM,2))) FROM MEDICHART
+	</select>
+	
+	<!-- 아이디별 진료기록 전체조회 -->
+	<select id="selectAllChart" resultMap="PetsVoMap">
+		  SELECT p.PET_SEQ ,p.PET_OWNER, p.PET_NAME, TO_CHAR(p.PET_BDAY,'YYYY-MM-DD') AS PET_BDAY,
+				p.PET_SPECIES ,p.PET_GENDER, p.PET_NEUT ,p.PET_REPORT ,
+				m.MEDI_NUM ,TO_CHAR(m.MEDI_VISIT,'YYYY-MM-DD') AS MEDI_VISIT, 
+				m.MEDI_L, m2.MEDI_NAME AS MEDI_NAME, m.MEDI_S, m3.MEDI_NAME, 
+				m.MEDI_TITLE , m.MEDI_CONTENT ,m.MEDI_DELFLAG
+			FROM PETSINFO p 
+			JOIN MEDICHART m ON p.PET_SEQ = m.MPET_SEQ 
+			LEFT JOIN MEDICODE m2 ON m.MEDI_L = m2.MEDI_CODE 
+			LEFT JOIN MEDICODE m3 ON m.MEDI_S = m3.MEDI_CODE 
+			WHERE p.PET_OWNER = #{pet_owner}
+			AND m.MEDI_DELFLAG ='N'
+			ORDER BY MEDI_VISIT DESC
+	</select>
+	
+	<!-- 아이디별 진료기록 전체조회(페이징 4개씩) -->
+	<select id="selectAllChartPaging" resultMap="PetsVoMap">
+		SELECT PET_SEQ,PET_OWNER, PET_NAME, MEDI_NUM, MEDI_VISIT, MEDI_TITLE
+			FROM (SELECT p.PET_SEQ, p.PET_OWNER, p.PET_NAME,
+				m.MEDI_NUM ,TO_CHAR(m.MEDI_VISIT,'YYYY-MM-DD') AS MEDI_VISIT, 
+				m.MEDI_TITLE , m.MEDI_DELFLAG , ROW_NUMBER ()OVER(ORDER BY MEDI_VISIT DESC) RN
+				FROM PETSINFO p 
+				JOIN MEDICHART m ON p.PET_SEQ = m.MPET_SEQ 
+				LEFT JOIN MEDICODE m2 ON m.MEDI_L = m2.MEDI_CODE 
+				LEFT JOIN MEDICODE m3 ON m.MEDI_S = m3.MEDI_CODE 
+				WHERE p.PET_OWNER = #{pet_owner}
+				<if test="pet_seq != null and pet_seq neq ''">
+				AND PET_SEQ = #{pet_seq}
+				</if>
+				AND m.MEDI_DELFLAG ='N')
+			WHERE RN BETWEEN #{first} AND #{last}
+	</select>
+	
+	<!-- 반려동물별 진료기록 조회 -->
+	<select id="selectPetChart" resultMap="PetsVoMap">
+		SELECT m.MEDI_NUM, m.MEDI_ID , m.MPET_SEQ , 
+				p.PET_NAME, p.PET_BDAY, p.PET_SPECIES,
+				p.PET_GENDER, p.PET_NEUT, p.PET_REPORT,
+				m.MEDI_L ,m2.MEDI_NAME, m.MEDI_S,m3.MEDI_NAME,
+				m.MEDI_TITLE, m.MEDI_CONTENT , TO_CHAR(m.MEDI_VISIT,'YYYY-MM-DD')AS MEDI_VISIT, m.MEDI_DELFLAG
+			FROM PETSINFO p 
+			JOIN MEDICHART m  ON p.PET_SEQ = m.MPET_SEQ 
+			LEFT JOIN MEDICODE m2 ON m.MEDI_L = m2.MEDI_CODE
+			LEFT JOIN MEDICODE m3 ON m.MEDI_S = m3.MEDI_NAME 
+			WHERE p.PET_OWNER =#{pet_owner}
+			AND m.MEDI_DELFLAG ='N'
+			AND p.PET_SEQ =#{pet_seq}
+			ORDER BY MEDI_VISIT DESC
+	</select>
+	
+	<!-- 진료코드 대분류, 소분류별 진료기록 조회 -->
+	<select id="selectSChart" resultMap="PetsVoMap">
+		SELECT p.PET_SEQ ,p.PET_OWNER, p.PET_NAME,TO_CHAR(p.PET_BDAY,'YYYY-MM-DD') AS PET_BDAY ,
+				p.PET_SPECIES ,p.PET_GENDER, p.PET_NEUT ,p.PET_REPORT ,
+				m.MEDI_NUM ,TO_CHAR(m.MEDI_VISIT,'YYYY-MM-DD') AS MEDI_VISIT, 
+				m.MEDI_L, m2.MEDI_NAME , m.MEDI_S, m3.MEDI_NAME , 
+				m.MEDI_TITLE , m.MEDI_CONTENT ,m.MEDI_DELFLAG
+			FROM PETSINFO p 
+			JOIN MEDICHART m ON p.PET_SEQ = m.MPET_SEQ 
+			LEFT JOIN MEDICODE m2 ON m.MEDI_L = m2.MEDI_CODE 
+			LEFT JOIN MEDICODE m3 ON m.MEDI_S = m3.MEDI_CODE 
+			WHERE p.PET_OWNER = #{pet_owner}
+			AND m.MEDI_DELFLAG ='N'
+			AND m.MEDI_L=#{medi_l}
+			AND m.MEDI_S=#{medi_s}
+			ORDER BY m.MEDI_VISIT DESC
+	</select>
+	
+	<!-- ANIMALCODE 테이블이랑 조인해서 동물코드에 따른 정보도 가져오는 쿼리로 변경하기 -->
+	<!-- 진료seq에 따른 진료기록 상세조회 -->
+	<select id="selectOneChart" resultMap="PetsVoMap" parameterType="java.lang.String">
+		SELECT p.PET_SEQ ,p.PET_OWNER, p.PET_NAME, TO_CHAR(p.PET_BDAY,'YYYY-MM-DD'),
+				p.PET_SPECIES ,p.PET_GENDER, p.PET_NEUT ,p.PET_REPORT ,
+				m.MEDI_NUM ,TO_CHAR(m.MEDI_VISIT,'YYYY-MM-DD') AS MEDI_VISIT ,
+				m.MEDI_L, m2.MEDI_NAME AS MEDI_LNAME , m.MEDI_S, m3.MEDI_NAME AS MEDI_SNAME , 
+				m.MEDI_TITLE , m.MEDI_CONTENT ,m.MEDI_DELFLAG
+			FROM PETSINFO p 
+			JOIN MEDICHART m ON p.PET_SEQ = m.MPET_SEQ 
+			LEFT JOIN MEDICODE m2 ON m.MEDI_L = m2.MEDI_CODE 
+			LEFT JOIN MEDICODE m3 ON m.MEDI_S = m3.MEDI_CODE 
+			WHERE m.MEDI_NUM =#{medi_num}
+			AND m.MEDI_DELFLAG ='N'
+			ORDER BY m.MEDI_VISIT DESC
+	</select>
+	
+	<!-- 아이디별 전체 글 개수 -->
+	<select id="chartAllCount" resultType="java.lang.Integer">
+		SELECT COUNT(*)
+			FROM MEDICHART
+			WHERE MEDI_ID = #{medi_id}
+	</select>
+	
+	<!-- 진료기록 수정 -->
+	<update id="modifyChart" parameterType="java.util.Map">
+		UPDATE MEDICHART
+			SET MEDI_CONTENT=#{medi_content}
+			WHERE MEDI_NUM=#{medi_num}
+	</update>
+	
+	<!-- 진료기록 삭제 -->
+	<update id="deleteChart">
+		UPDATE MEDICHART SET MEDI_DELFLAG='Y' 
+			WHERE MEDI_NUM=#{medi_num}
+	</update>
+	
+	<!-- 전체 진료코드 조회 -->
+	<select id="selectAllMediCode" resultType="com.min.edu.vo.MediCode_VO">
+		SELECT MEDI_CODE , MEDI_NAME , MEDI_TOP
+			FROM MEDICODE
+	</select>
+	
+	<!-- 진료코드로 이름 조회 -->
+	<select id="searchMediName" resultType="com.min.edu.vo.MediCode_VO">
+		SELECT MEDI_NAME, MEDI_TOP
+			FROM MEDICODE
+			WHERE MEDI_CODE = #{medi_code}
+	</select>
+	
+	<!-- 진료기록 컨텐츠 영역 조회 -->
+	<select id="getDetail" resultType="java.lang.String">
+		SELECT CONTENT
+			FROM MEDICHART
+			WHERE MEDI_NUM=#{medi_num}
+	</select>
+	
+	<!-- 파일업로드 -->
+	<insert id="fileUpload" parameterType="com.min.edu.vo.FileBoard_VO">
+		INSERT INTO PROJECT.FILEBOARD
+			(F_SEQ, F_REF, F_ORIGINNAME, F_STOREDNAME, F_SIZE, F_DELFLAG)
+			VALUES((SELECT NVL(MAX(F_SEQ),0)+1 FROM FILEBOARD), #{f_ref}, #{f_originname}, #{f_storedname}, #{f_size}, 'N' )
+	</insert>
+	
+</mapper>

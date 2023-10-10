@@ -1,0 +1,47 @@
+@charset "UTF-8";
+
+.resrv_record{
+	width:100%;
+	border-collapse: collapse;
+	margin-bottom: 30px;
+}
+
+.resrv_record table{
+	margin: 20px auto;
+	width: 80%;
+	border-collapse: collapse;
+}
+
+.resrv_record tr,th,td{
+	padding: 8px;
+	text-align: center;
+ 	border-bottom: 1px solid #3E2723;
+ 	font-size: 15px;
+}
+
+.resrv_record th{
+	width: 40px;
+	background-color: #BCAAA4;
+}
+
+.resrv_record td{
+	height: 50px;
+}
+
+#listname{
+	margin-top: 0px;
+	padding-top: 30px;
+	text-align: center;
+}
+
+table li{
+	display: inline;
+	float:none;
+    font-size: 20px;
+    margin-right: 10px;
+}
+
+table img, table a{
+	width: 15px;
+	height: 15px;
+}

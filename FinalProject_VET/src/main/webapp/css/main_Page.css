@@ -1,0 +1,70 @@
+@charset "UTF-8";
+#mainContainer {
+    width: 1000px;
+    margin: 0px auto;
+    height: 1000px;
+    padding:30px;
+}
+
+#map_info, #question_info{
+	width:100%;
+	padding: 5px  0px 5px 0px;
+	margin-bottom: 20px;
+	height: 310px;
+}
+#notice_info{
+	width: 47%;
+	float: left;
+	border: 1px dotted #ccc;
+	padding: 5px;
+	height: 310px;
+}
+#chosen_hosp{
+	width: 47%;
+	float:right;
+	border: 1px dotted #ccc;
+	padding: 5px;
+	height: 310px;
+}
+
+#mapImage{
+	float: left;
+	height: 100%;
+	width: 403px;
+	padding-left: 10px;
+}
+
+#qnaImage{
+	float: right;
+	height: 100%;
+	padding-right: 10px;
+}
+
+#map_descript{
+	float: right;
+	margin-right: 20px;
+}
+
+#question_descript{
+	float: left;
+	width: 550px;
+}
+#notice{
+	border-bottom: 2px solid #3E2723;
+}
+#noti_plus{
+	float: right;
+}
+
+#chosen{
+	border-bottom: 2px solid #3E2723;
+}
+
+.titlePart{
+	padding: 30px;
+	color:  #3E2723;
+}
+
+.contentPart{
+	padding: 30px;
+}

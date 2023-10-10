@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.min.edu.model.mapper.Schedule_DaoImpl">
+
+<!-- 일반사용자 아이디별 전체일정 조회 -->
+<select id="selectAllSchedule" resultType="com.min.edu.vo.SchedBoard_VO">
+	SELECT SCHE_NUM, SCHE_ID, SCHE_TITLE, SCHE_CONTENT , CASE WHEN SCHE_HOUR IS NULL THEN TO_CHAR(SCHE_DATE, 'YYYY-MM-DD') 
+					  WHEN SCHE_HOUR IS NOT NULL THEN TO_CHAR(SCHE_DATE, 'YYYY-MM-DD') ||'T'|| SCHE_HOUR || SCHE_MINUTE ||':00'
+				 	  END AS SCHE_DATE 
+		FROM SCHEDBOARD
+		WHERE SCHE_ID = #{sche_id}
+		ORDER BY SCHE_DATE, SCHE_HOUR , SCHE_TITLE
+</select>
+
+<!-- 일정번호를 통한 상세조회 -->
+<select id="selectOneSchedule" resultType="com.min.edu.vo.SchedBoard_VO"> 
+	SELECT SCHE_NUM, TO_CHAR(SCHE_DATE, 'YYYY-MM-DD') AS SCHE_DATE, SCHE_TITLE, SCHE_CONTENT , SCHE_HOUR, SCHE_MINUTE
+		FROM SCHEDBOARD
+		WHERE SCHE_NUM = #{sche_num}
+</select>
+
+<!-- 새 일정 등록 -->
+<insert id="insertNewSchedule" parameterType="com.min.edu.vo.SchedBoard_VO">
+	INSERT INTO PROJECT.SCHEDBOARD
+		(SCHE_NUM, SCHE_ID, SCHE_DATE, 
+		SCHE_TITLE, SCHE_CONTENT, SCHE_HOUR, SCHE_MINUTE)
+		VALUES((SELECT NVL(MAX(SCHE_NUM),0)+1 FROM SCHEDBOARD), #{sche_id}, #{sche_date}, 
+				#{sche_title}, #{sche_content}, #{sche_hour}, #{sche_minute})
+	
+</insert>
+
+<!-- 일정 수정 -->
+<update id="modifySchedule" parameterType="java.util.Map">
+	UPDATE SCHEDBOARD
+		SET SCHE_TITLE=#{sche_title}, SCHE_CONTENT=#{sche_content}
+		WHERE SCHE_NUM=#{sche_num}
+</update>
+
+<!-- 일정 삭제 -->
+<delete id="deleteSchedule">
+	DELETE FROM SCHEDBOARD
+		WHERE SCHE_NUM=#{sche_num}
+</delete>
+<!-- 일반사용자 ID, 일정명, 일정시간, 일정날짜로 일정 삭제 -->
+<delete id="deleteRSV" parameterType="java.util.Map">
+	DELETE FROM SCHEDBOARD
+		WHERE SCHE_ID =#{sche_id}
+			AND SCHE_DATE =#{sche_date}
+			AND SCHE_HOUR =#{sche_hour}
+			AND SCHE_TITLE =#{sche_title}
+</delete>
+
+</mapper>

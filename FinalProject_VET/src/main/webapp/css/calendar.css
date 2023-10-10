@@ -1,0 +1,185 @@
+@charset "UTF-8";
+
+.fa-caret-down {
+  float: right;
+  padding-right: 8px;
+}
+
+#calendar{
+	width: 100%;
+	margin: 0px auto;
+	padding-top: 50px;
+}
+listname
+/* 일요일 날짜 빨간색 */
+.fc-day-sun a{
+  color: red;
+  text-decoration: none;
+}
+.fc-day-sun a div{
+  color: black;
+}
+
+/* 토요일 날짜 파란색 */
+.fc-day-sat a {
+  color: blue;
+  text-decoration: none;
+}
+.fc-day-sat a div {
+  color: black;
+}
+
+.fc-direction-ltr .fc-daygrid-event .fc-event-time {
+    font-size: 12px;
+    letter-spacing:-2px;
+}
+.fc-daygrid-dot-event .fc-event-title {
+    font-size: 12px;
+    letter-spacing: -2px;
+}
+.modal-header{
+	background-color:#EFEBE9; 
+}
+
+.modal-footer button{
+	width: 100px;
+	height: 30px;
+	background-color: #EFEBE9;
+	border: 1px solid #3E2723;
+	border-radius: 5px;
+	font-size: 17px;
+}
+.modal-footer button:hover{
+	cursor: pointer;
+	border: 2px solid #3E2723;
+}
+.modal-footer button:active{
+	background-color: #BCAAA4;
+}
+
+#waitList {
+	margin: 0px auto;
+	width: 100%;
+	border-collapse: collapse;
+}
+#waitList table{
+	width: 100%;
+}
+
+#waitList th,tr,td{
+	padding: 8px;
+	text-align: left;
+ 	border-bottom: 1px solid #3E2723;
+ 	font-size: 15px;
+}
+#waitList th{
+	background-color: #BCAAA4;
+}
+
+#waitList button{
+	width: 80px;
+	height: 30px;
+	background-color: #EFEBE9;
+	border: 1px solid #3E2723;
+	border-radius: 5px;
+	font-size: 17px;
+}
+#waitList button:hover{
+	cursor: pointer;
+	border: 2px solid #3E2723;
+}
+#waitList button:active{
+	background-color: #BCAAA4;
+}
+#month_cnt th,td,tr{
+	padding: 8px;
+	text-align: center;
+ 	border-bottom: 1px solid #3E2723;
+ 	font-size: 15px;
+}
+#month_cnt th{
+	background-color: #BCAAA4;
+}
+
+#hosp_detail{
+	width: 100%;
+	margin-top: 50px;
+}
+#hosp_detail tr{
+	height: 50px;
+}
+#hosp_detail th{
+	width: 160px;
+}
+#hosp_detail td{
+	text-align: left;	
+	padding-left: 30px;
+}
+#hosp_infoMNG{
+	text-align: center;
+	padding-top: 30px;
+}
+
+button, input, optgroup, select, textarea{
+	font-size: 13.3px;
+}
+
+#hosp_modify{
+  width: 100%;
+	height: 30px;
+	background-color: #EFEBE9;
+	border: 1px solid #3E2723;
+	border-radius: 5px;
+	font-size: 17px;
+	text-align: center;
+}
+
+#hosp_modify:hover{
+	cursor: pointer;
+	border: 2px solid #3E2723;
+}
+#hosp_modify:active{
+	background-color: #BCAAA4;
+}
+#hosp_modifyArea{
+	width: 100px;
+	margin: 30px auto;
+}
+#myChart{
+	width: 100%;
+}
+#listname{
+   font-weight: bold;
+   margin-bottom: 30px;
+   margin-top: 0px;
+   padding-top: 30px;
+   text-align: center;
+}
+
+#calhead{
+   font-weight: bold;
+   margin-bottom: 30px;
+   margin-top: 0px;
+   padding-top: 30px;
+   text-align: center;
+}
+
+#writeChart{
+	width: 150px;
+	
+}
+
+#hosp_resign{
+  width: 100%;
+	height: 30px;
+	background-color: #EFEBE9;
+	border: 1px solid #3E2723;
+	border-radius: 5px;
+	font-size: 17px;
+	text-align: center;
+}
+
+#hosp_modifyArea{
+	display: block;
+	text-align: center;
+}

@@ -1,0 +1,40 @@
+@charset "UTF-8";
+
+.selectPart{
+	margin: 10px;
+	width: 110px;
+	height: 20px;
+	border-radius: 5px;
+	text-align: center;
+}
+
+#medi_title{
+	margin: 10px;
+	width: 400px;
+	height: 20px;
+	border-radius: 5px;
+}
+
+#writeBoard{
+	float: right;
+	margin-right: 10px;
+}
+#backToList{
+	float: left;
+	margin-left: 10px;
+}
+
+.buttonPart button{
+	background-color: #D7CCC8;
+	width: 110px;
+	height: 20px;
+	border-radius: 5px;
+	font: #3E2723;
+	border: none;
+	box-shadow: 1.5px 1.5px 1.5px 0 #3E2723;
+	margin: 10px;
+}
+
+.buttonPart button:hover{
+	background-color:  #BCAAA4;
+}

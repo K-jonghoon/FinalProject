@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.min.edu.model.mapper.Board_DaoImpl">
+
+<resultMap type="com.min.edu.vo.QuestBoard_VO" id="BoardMap">
+	<result column="QST_SEQ" property="qst_seq"/>
+	<result column="QST_ID" property="qst_id"/>
+	<result column="QST_TITLE" property="qst_title"/>
+	<result column="QST_CONTENT" property="qst_content"/>
+	<result column="QST_SPECIES" property="qst_species"/>
+	<result column="QST_PART" property="qst_part"/>
+	<result column="QST_REGDATE" property="qst_regdate"/>
+	<result column="QST_FAST" property="qst_fast"/>
+	<result column="QST_STATUS" property="qst_status"/>
+	
+	<collection property="replyboard_vo" resultMap="ReplyVOMap"/>
+	<collection property="fileboard_vo" resultMap="FileVOMap"/>
+	<collection property="animalcode_vo" resultMap="CodeVOMap"/>
+	<collection property="animalpart_vo" resultMap="PartVOMap"/>
+	<collection property="users_vo" resultMap="UserVOMap"/>
+	<collection property="hospital_vo" resultMap="HospitalVOMap"/>
+</resultMap>
+
+<resultMap type="com.min.edu.vo.ReplyBoard_VO" id="ReplyVOMap">
+	<result column="RPY_SEQ" property="rpy_seq"/>
+	<result column="RPY_ID" property="rpy_id"/>
+	<result column="RPY_REF" property="rpy_ref"/>
+	<result column="RPY_CONTENT" property="rpy_content"/>
+	<result column="RPY_REGDATE" property="rpy_regdate"/>
+	<result column="RPY_STATUS" property="rpy_status"/>
+	<result column="RPY_CHOSEN" property="rpy_chosen"/>
+	
+	<collection property="hospital_vo" resultMap="HospitalVOMap"/>
+</resultMap>
+
+<resultMap type="com.min.edu.vo.FileBoard_VO" id="FileVOMap">
+	<result column="F_SEQ" property="f_seq"/>
+	<result column="F_REF" property="f_ref"/>
+	<result column="F_ORIGINNAME" property="f_originname"/>
+	<result column="F_STOREDNAME" property="f_storedname"/>
+	<result column="F_SIZE" property="f_size"/>
+	<result column="F_DELFLAG" property="f_delflag"/>
+</resultMap>
+
+<resultMap type="com.min.edu.vo.AnimalCode_VO" id="CodeVOMap">
+	<result column="ANM_CODE" property="anm_code"/>
+	<result column="ANM_SPECIES" property="anm_species"/>
+</resultMap>
+
+<resultMap type="com.min.edu.vo.AnimalPart_VO" id="PartVOMap">
+	<result column="PART_NAME" property="part_name"/>
+	<result column="PART_CODE" property="part_code"/>
+</resultMap>
+
+<resultMap type="com.min.edu.vo.Users_VO" id="UserVOMap">
+	<result column="USERS_ID" property="users_id"/>
+	<result column="USERS_NAME" property="users_name"/>
+	<result column="USERS_STATUS" property="users_status"/>
+	<result column="USERS_AUTH" property="users_auth"/>
+</resultMap>
+
+<resultMap type="com.min.edu.vo.Hospital_VO" id="HospitalVOMap">
+	<result column="HOSP_ID" property="hosp_id"/>
+	<result column="HOSP_NAME" property="hosp_name"/>
+</resultMap>
+
+<!--  게시글 전체조회 : 우선답변 게시글 상위정렬 -->
+<select id="selectQuest" resultMap="BoardMap">
+SELECT q.QST_SEQ, q.QST_ID, u.USERS_NAME, 
+		q.QST_TITLE, q.QST_CONTENT, q.QST_SPECIES,
+		a1.ANM_SPECIES, q.QST_PART, a2.PART_NAME, 
+		q.QST_REGDATE, q.QST_FAST
+	FROM QUESTBOARD q JOIN USERSINFO u  
+	ON q.QST_ID = u.USERS_ID 
+	JOIN ANIMALCODE a1
+	ON q.QST_SPECIES = a1.ANM_CODE
+	JOIN ANIMALPART a2
+	ON q.QST_PART = a2.PART_CODE
+	WHERE q.QST_STATUS != 'N'
+    ORDER BY q.QST_FAST DESC, q.QST_REGDATE DESC 
+</select>
+
+<!-- 유저이름 조회 -->
+<select id="selectQuestUsers" >
+SELECT q.QST_ID, u.USERS_NAME
+	FROM USERSINFO u JOIN QUESTBOARD q
+	ON q.QST_ID = u.USERS_ID
+</select>
+
+<!-- 대분류/소분류 선택 전체조회 -->
+<select id="selectPartQuest" resultMap="BoardMap">
+  	SELECT 	QST_SEQ, QST_ID, QST_TITLE, QST_CONTENT, QST_STATUS, QST_REGDATE, QST_FAST,
+  			USERS_NAME, QST_SPECIES, ANM_SPECIES, QST_PART, PART_NAME
+	FROM (
+		<![CDATA[
+		SELECT QST_SEQ, QST_ID, QST_TITLE, QST_CONTENT, QST_STATUS, QST_REGDATE, QST_FAST,
+  			USERS_NAME, QST_SPECIES, ANM_SPECIES, QST_PART, PART_NAME,
+				ROW_NUMBER() OVER(ORDER BY QST_FAST DESC, QST_REGDATE DESC) rn
+		 	FROM QUESTBOARD q JOIN USERSINFO u  
+				ON q.QST_ID = u.USERS_ID 
+				JOIN ANIMALCODE a1
+				ON q.QST_SPECIES = a1.ANM_CODE
+				JOIN ANIMALPART a2
+				ON q.QST_PART = a2.PART_CODE 
+		]]>		 	
+  	WHERE QST_STATUS != 'N'
+		)
+	<where>
+	<if test="qst_species != null">
+	AND qst_species = #{qst_species}
+	</if> 
+	<if test="qst_part != null">
+	AND qst_part = #{qst_part}
+	</if>
+	<if test="qst_content != null">
+	AND qst_content LIKE '%'||#{qst_content}||'%'
+	</if>
+	AND rn BETWEEN #{first} AND #{last}
+	</where>
+    ORDER BY QST_FAST DESC, QST_REGDATE DESC 
+</select>
+
+<select id="selectCodeAndPart" resultType="com.min.edu.vo.AnimalCode_VO">
+SELECT ANM_CODE, ANM_SPECIES
+	FROM ANIMALCODE JOIN 
+</select>
+
+<!-- 모든 게시글/답글 조회 (관리자) -->
+<select id="selectAllBoard" resultType="QuestBoard_VO">
+SELECT q.QST_SEQ, u.USERS_NAME , q.QST_ID, q.QST_TITLE, 
+	q.QST_CONTENT, q.QST_REGDATE, q	.QST_FAST, 
+	r.RPY_SEQ, r.RPY_ID , r.RPY_REF , r.RPY_CONTENT , r.RPY_STATUS, r.RPY_CHOSEN 
+	FROM QUESTBOARD q ,USERSINFO u, REPLYBOARD r 
+	WHERE q.QST_SEQ = r.RPY_REF 
+	AND q.QST_STATUS = 'Y'
+    ORDER BY q.QST_SEQ
+</select>
+
+<!-- 게시글 상세조회 및 해당 게시글의 답글 전체조회 -->
+<select id="selectOneBoard" resultMap="BoardMap">
+SELECT q.QST_SEQ, q.QST_ID, u.USERS_NAME AS users_name, q.QST_TITLE, q.QST_CONTENT,
+	 q.QST_SPECIES, q.QST_PART,
+	 q.QST_REGDATE, r.RPY_SEQ, r.RPY_ID, r.RPY_REF, 
+	 r.RPY_CONTENT , r.RPY_STATUS, r.RPY_REGDATE, a1.ANM_SPECIES, a2.PART_NAME
+	FROM QUESTBOARD q
+	INNER JOIN USERSINFO u on q.QST_ID = u.USERS_ID 
+	LEFT JOIN REPLYBOARD r on q.QST_SEQ = r.RPY_REF	
+	LEFT JOIN HOSPITAL h on h.HOSP_ID = r.RPY_ID
+	LEFT JOIN ANIMALCODE a1 ON q.QST_SPECIES = a1.ANM_CODE 
+	LEFT JOIN ANIMALPART a2 ON q.QST_PART = a2.PART_CODE 
+	where
+	(q.QST_STATUS != 'N' OR r.RPY_STATUS != 'N')
+	AND q.QST_SEQ = #{qst_seq}
+    ORDER BY r.RPY_SEQ DESC
+</select>
+
+<!-- 답글만 전체조회 -->
+<select id="selectReply" resultMap="ReplyVOMap">
+SELECT r.RPY_SEQ, r.RPY_ID, h.HOSP_NAME, r.RPY_CONTENT, r.RPY_REGDATE, r.RPY_CHOSEN 
+	FROM REPLYBOARD r
+	JOIN QUESTBOARD q ON r.RPY_REF = q.QST_SEQ
+	JOIN HOSPITAL h ON r.RPY_ID = h.HOSP_ID
+	WHERE q.QST_SEQ = #{qst_seq}
+	ORDER BY RPY_CHOSEN  DESC, RPY_REGDATE DESC
+</select>
+  
+<!-- 신고글 전체조회 (관리자) -->
+<select id="selectReportBoard" resultType="QuestBoard_VO">
+  SELECT q.QST_ID, u.USERS_NAME , q.QST_TITLE, q.QST_CONTENT, q.QST_SPECIES, q.QST_PART, q.QST_REGDATE, q.QST_STATUS, r.RPY_SEQ, r.RPY_ID , RPY_CONTENT , r.RPY_REGDATE, r.RPY_STATUS
+	FROM QUESTBOARD q, USERSINFO u, REPLYBOARD r 
+	WHERE q.QST_ID = u.USERS_ID 
+	AND q.QST_SEQ = RPY_REF 
+	AND q.QST_STATUS = 'R' OR r.RPY_STATUS ='R'
+</select>
+
+<!-- 게시글 입력 -->
+<insert id="insertQuest">
+	<selectKey keyProperty="qst_seq" resultType="java.lang.String" order="BEFORE">
+	SELECT CONCAT('Q', NVL(MAX(TO_NUMBER(SUBSTR(QST_SEQ,2))), 0)+1) AS QST_SEQ FROM QUESTBOARD
+	</selectKey>
+INSERT INTO QUESTBOARD
+(QST_SEQ, QST_ID, QST_TITLE, QST_CONTENT, QST_SPECIES, QST_PART, QST_FAST)
+VALUES(
+		#{qst_seq}, #{qst_id}, #{qst_title}, 
+		#{qst_content}, #{qst_species}, #{qst_part}, #{qst_fast} )
+</insert>
+
+<!-- maxSeq 조회 -->
+<select id="getMaxSeq" resultType="java.lang.String">
+	SELECT 'Q'|| MAX(TO_NUMBER(SUBSTR(QST_SEQ,2))) FROM QUESTBOARD
+</select>
+
+<!-- 우선게시글 전환 -->
+<update id="updateFastQuest" >
+UPDATE QUESTBOARD
+SET QST_FAST='Y'
+WHERE QST_SEQ=#{qst_seq}
+</update>
+
+<!-- 게시글 수정 -->
+<update id="modifyQuest" >
+UPDATE QUESTBOARD
+SET QST_CONTENT=#{qst_content}, QST_TITLE=#{qst_title}, QST_SPECIES=#{qst_species}, QST_PART=#{qst_part}
+WHERE QST_SEQ=#{qst_seq}
+</update>
+
+<!-- 게시글 신고 -->
+<update id="reportQuest">
+UPDATE QUESTBOARD
+SET QST_STATUS ='R'
+WHERE QST_SEQ=#{qst_seq}
+</update>
+
+<!-- 게시글 삭제 -->
+<update id="deleteQuest">
+UPDATE QUESTBOARD
+SET QST_STATUS ='N'
+WHERE QST_SEQ=#{qst_seq}
+</update>
+
+<!-- 답글 입력 -->
+<insert id="insertReply" >
+	<selectKey  keyProperty="rpy_seq" resultType="java.lang.String" order="BEFORE">
+	(SELECT CONCAT('R',NVL(MAX(TO_NUMBER(SUBSTR(RPY_SEQ,2))), 0)+1) AS RPY_SEQ FROM REPLYBOARD)
+	</selectKey>
+INSERT INTO REPLYBOARD 
+(RPY_SEQ, RPY_ID, RPY_REF, RPY_CONTENT, RPY_REGDATE, RPY_STATUS, RPY_CHOSEN)
+VALUES( #{rpy_seq},
+		#{rpy_id},  
+		#{rpy_ref}, #{rpy_content}, CURRENT_DATE, 
+		'Y' , 'N' )
+</insert>
+
+<!-- 답글 수정 -->
+<update id="modifyReply" >
+UPDATE REPLYBOARD
+SET RPY_CONTENT=#{rpy_content}
+WHERE RPY_SEQ = #{rpy_seq}
+</update>
+
+<!-- 답글 삭제 -->
+<update id="deleteReply">
+UPDATE REPLYBOARD 
+SET RPY_STATUS ='N'
+WHERE RPY_SEQ = #{rpy_seq}
+</update>
+
+<!-- 답글 신고 -->
+<update id="reportReply">
+UPDATE REPLYBOARD 
+SET RPY_STATUS ='R'
+WHERE RPY_SEQ = #{rpy_seq}
+</update>
+
+<!-- 답글 채택 -->
+<update id="chooseReply">
+UPDATE REPLYBOARD 
+SET RPY_CHOSEN ='Y'
+WHERE RPY_SEQ = #{rpy_seq}
+</update>
+
+<!-- 전체 답글 수 -->
+<select id="countReply" resultType="java.lang.Integer">
+SELECT COUNT(r.RPY_SEQ)
+FROM HOSPITAL h
+JOIN REPLYBOARD r ON h.HOSP_ID = r.RPY_ID
+WHERE r.RPY_STATUS = 'Y'
+AND h.HOSP_ID = #{hosp_id}
+</select>
+
+<!-- 해당 병원의 전체 답글 수 -->
+<select id="countChosenReply" resultType="java.lang.Integer">
+SELECT COUNT(r.RPY_SEQ)
+FROM HOSPITAL h
+JOIN REPLYBOARD r ON h.HOSP_ID = r.RPY_ID
+WHERE r.RPY_CHOSEN = 'Y'
+AND h.HOSP_ID = #{hosp_id}
+</select>
+
+<!-- 채택률 -->
+<select id="calChoiceRate" resultType="java.lang.Integer">
+SELECT
+	SUM(CASE WHEN RPY_CHOSEN = 'Y' THEN 1 ELSE 0 END) / COUNT(RPY_SEQ) * 100 AS 채택율
+FROM REPLYBOARD
+WHERE RPY_ID = #{rpy_id}
+AND RPY_STATUS = 'Y'
+</select>
+
+<!--     COUNT(RPY_SEQ) AS 전체_작성_글_수, -->
+<!--     SUM(CASE WHEN RPY_CHOSEN = 'Y' THEN 1 ELSE 0 END) AS 채택된_글_수, -->
+
+<!-- 동물코드로 동물종 조회  -->
+<select id="selectAnimalName" resultType="com.min.edu.vo.AnimalCode_VO">
+SELECT ANM_CODE, ANM_SPECIES
+	FROM ANIMALCODE
+	WHERE ANM_CODE = ${anm_code}
+</select>
+
+<select id="selectAnimalPart" resultType="com.min.edu.vo.AnimalPart_VO">
+SELECT PART_CODE, PART_NAME
+	FROM ANIMALPART
+	WHERE PART_CODE = ${part_code}
+</select>
+
+<!-- 일반사용자 아이디로 일반문의글 조회 -->
+<select id="selectUsersBoard" resultType="com.min.edu.vo.QuestBoard_VO">
+	SELECT QST_SEQ, QST_ID, QST_TITLE, QST_REGDATE
+		FROM QUESTBOARD
+		WHERE QST_ID=#{qst_id}
+		AND QST_FAST='N'
+</select>
+
+<!-- 일반사용자 아이디로 빠른문의글 조회 -->
+<select id="selectFastBoard" resultType="com.min.edu.vo.QuestBoard_VO">
+	SELECT QST_SEQ, QST_ID, QST_TITLE, QST_REGDATE
+		FROM QUESTBOARD
+		WHERE QST_ID=#{qst_id}
+		AND QST_FAST='Y'
+</select>
+
+ <select id="getAllBoardPage" resultType="com.min.edu.vo.QuestBoard_VO">
+  	SELECT 	QST_SEQ, QST_ID, QST_TITLE, QST_CONTENT, QST_STATUS, QST_REGDATE, QST_FAST,
+  			USERS_NAME, QST_SPECIES, ANM_SPECIES, QST_PART, PART_NAME
+	FROM (
+		<![CDATA[
+		SELECT QST_SEQ, QST_ID, QST_TITLE, QST_CONTENT, QST_STATUS, QST_REGDATE, QST_FAST,
+  			USERS_NAME, QST_SPECIES, ANM_SPECIES, QST_PART, PART_NAME,
+				ROW_NUMBER() OVER(ORDER BY QST_FAST DESC, QST_REGDATE DESC) rn
+		 	FROM QUESTBOARD q JOIN USERSINFO u  
+				ON q.QST_ID = u.USERS_ID 
+				JOIN ANIMALCODE a1
+				ON q.QST_SPECIES = a1.ANM_CODE
+				JOIN ANIMALPART a2
+				ON q.QST_PART = a2.PART_CODE 
+		]]>		 	
+	<where>
+  	QST_STATUS != 'N'
+	<if test="qst_species != null">
+	AND qst_species = #{qst_species}
+	</if> 
+	<if test="qst_part != null">
+	AND qst_part = #{qst_part}
+	</if>
+	<if test="qst_content != null">
+	AND qst_content LIKE '%'||#{qst_content}||'%'
+	</if>
+  	</where>
+		)
+	<where>
+	rn BETWEEN #{first} AND #{last}
+	</where>
+    ORDER BY QST_FAST DESC, QST_REGDATE DESC 
+  </select>
+  
+  <select id="getAllBoardCount" resultType="java.lang.Integer">
+  	SELECT COUNT(*) FROM QUESTBOARD
+  	<where>
+  	QST_STATUS != 'N'
+	<if test="qst_species != null">
+	AND qst_species = #{qst_species}
+	</if> 
+	<if test="qst_part != null">
+	AND qst_part = #{qst_part}
+	</if>
+	<if test="qst_content != null">
+	AND qst_content LIKE '%'||#{qst_content}||'%'
+	</if>
+	</where>
+  </select>
+
+
+</mapper>
+
+
+
+
+
+
+
+
+
+

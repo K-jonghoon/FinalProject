@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.min.edu.model.mapper.Chosen_DaoImpl">
+
+	<resultMap type="com.min.edu.vo.Chosen_VO" id="Chosen_VO">
+		<result column="RPY_ID" property="rpy_id"/>
+		<result column="RPY_CNT" property="rpy_cnt"/>
+		<result column="RPY_CHOSEN" property="rpy_chosen"/>
+		
+		<collection property="users_vo" resultMap="Users_VO"/>
+	</resultMap>
+	
+	<resultMap type="com.min.edu.vo.Users_VO" id="Users_VO">
+		<result column="USERS_NAME" property="users_name"/>
+	</resultMap>
+
+	<!-- 답글 수 대비 채택 1~3위 -->
+	<select id="chosen_rank" resultMap="Chosen_VO">
+		SELECT 	u.USERS_NAME , RPY_ID, RPY_CNT, RPY_CHOSEN, RN 
+			FROM(SELECT RPY_ID, RPY_CNT, RPY_CHOSEN, 
+						ROW_NUMBER () OVER (ORDER BY RPY_CHOSEN DESC, RPY_CNT ASC) AS RN
+					FROM (SELECT RPY_ID , COUNT(RPY_ID) AS RPY_CNT , COUNT(CASE WHEN RPY_CHOSEN='Y' THEN 1 END) AS RPY_CHOSEN
+							FROM REPLYBOARD r 
+							GROUP BY RPY_ID )) r2
+			JOIN USERSINFO u ON u.USERS_ID = r2.RPY_ID 
+			WHERE RN BETWEEN '1' AND '3'
+	</select>
+
+	<!-- 해당 병원의 답글 수, 채택 수 -->
+	<select id="rpy_cnt_chsn" resultType="com.min.edu.vo.Chosen_VO">
+		SELECT RPY_ID , COUNT(RPY_ID) AS RPY_CNT , COUNT(CASE WHEN RPY_CHOSEN='Y' THEN 1 END) AS RPY_CHOSEN
+			FROM REPLYBOARD r 
+			GROUP BY RPY_ID
+			HAVING RPY_ID = #{rpy_id}
+	</select>
+
+
+</mapper>

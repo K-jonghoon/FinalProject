@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.min.edu.model.mapper.Notice_DaoImpl">
+
+<select id="selectNotice" resultType="com.min.edu.vo.NoticeBoard_VO">
+	SELECT NOTI_SEQ, NOTI_TITLE, NOTI_ID,NOTI_REGDATE, NOTI_DELFLAG
+	FROM NOTICEBOARD n
+	WHERE NOTI_DELFLAG = 'N'
+	ORDER BY NOTI_REGDATE DESC
+</select>
+
+<select id="selectAllNotice" resultType="com.min.edu.vo.NoticeBoard_VO">
+	SELECT NOTI_SEQ, NOTI_TITLE, NOTI_ID, NOTI_REGDATE, NOTI_DELFLAG
+	FROM NOTICEBOARD n
+	ORDER BY NOTI_REGDATE DESC
+</select>
+
+<select id="selectNoticeDetail" resultType="com.min.edu.vo.NoticeBoard_VO">
+	SELECT NOTI_SEQ, NOTI_TITLE, NOTI_CONTENT, NOTI_ID, NOTI_REGDATE
+	FROM NOTICEBOARD n
+	WHERE NOTI_SEQ = #{noti_seq}
+</select>
+
+<insert id="insertNotice">
+	INSERT INTO NOTICEBOARD
+		(NOTI_SEQ,
+		 NOTI_AUTH, NOTI_ID, NOTI_TITLE,
+		 NOTI_CONTENT, NOTI_REGDATE, NOTI_DELFLAG)
+		VALUES((SELECT CONCAT('N', NVL(MAX(TO_NUMBER(SUBSTR(NOTI_SEQ, 2))),0)+1) AS NOTI_SEQ FROM NOTICEBOARD n),
+				#{noti_auth} , #{noti_id}, #{noti_title}, #{noti_content}, SYSDATE , 'N' )
+</insert>
+
+<update id="modifyNotice">
+	UPDATE NOTICEBOARD
+		SET NOTI_TITLE=#{noti_title}, NOTI_CONTENT=#{noti_content}
+		WHERE NOTI_SEQ=#{noti_seq}
+</update>
+
+<delete id="deleteNotice">
+	UPDATE NOTICEBOARD SET NOTI_DELFLAG='Y'
+		WHERE NOTI_DELFLAG = 'N'
+		AND NOTI_SEQ = #{noti_seq}
+</delete>
+
+</mapper>

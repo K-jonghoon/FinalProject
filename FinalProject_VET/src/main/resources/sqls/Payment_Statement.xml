@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.min.edu.model.mapper.Payment_DaoImpl">
+
+<!-- 일반사용자 id별 결제내역 조회 -->
+<select id="selectAllPayment" resultType="com.min.edu.vo.Payment_VO">
+	SELECT PAY_NUM , PAY_AMOUNT , PAY_TIME , PAY_METHOD , PAY_STATUS , MERCHANT_UID
+		FROM PAYMENT
+		WHERE PAY_ID =#{pay_id}
+		ORDER BY PAY_TIME DESC
+</select>
+
+<!-- 결제번호별 결제내역 상세조회 -->
+<select id="selectOnePayment" resultType="com.min.edu.vo.Payment_VO">
+	SELECT PAY_NUM, PAY_ID , PAY_AMOUNT , PAY_TIME , PAY_METHOD , PAY_STATUS , MERCHANT_UID, IMP_UID
+		FROM PAYMENT
+		WHERE PAY_NUM =#{pay_num}
+</select>
+
+<!-- 새 결제내역 등록 -->
+<insert id="insertNewPayment" parameterType="java.util.Map">
+	INSERT INTO PAYMENT
+		(PAY_NUM, 
+		PAY_ID, PAY_AMOUNT, PAY_TIME,
+		PAY_STATUS, PAY_METHOD, PAY_CODE, MERCHANT_UID, IMP_UID)
+		VALUES('P'||TO_CHAR(SYSDATE,'YYMMDD')||(SELECT COUNT(PAY_NUM)+1 FROM PAYMENT p), 
+				#{pay_id}, #{pay_amount}, (SYSDATE) , 
+				'Y' , 'CARD' , #{pay_code},#{merchant_uid},#{imp_uid})
+</insert>
+
+<!-- 결제 취소 상태 변경 -->
+<update id="canclePayment">
+	UPDATE PAYMENT
+		SET PAY_STATUS='C'
+		WHERE IMP_UID=#{imp_uid}
+</update>
+
+<!-- 결제고유번호로 결제정보 조회 -->
+<select id="searchMID" resultType="com.min.edu.vo.Payment_VO">
+	SELECT PAY_NUM, PAY_ID, PAY_AMOUNT, PAY_TIME, PAY_STATUS, PAY_METHOD, PAY_CODE, MERCHANT_UID, IMP_UID
+		FROM PAYMENT
+		WHERE IMP_UID =#{imp_uid}
+</select>
+
+<!-- 결제금액 or 환불금액 만큼 포인트 등록 -->
+<insert id="insertNewPnt" parameterType="java.util.Map">
+	INSERT INTO POINT
+		(PNT_ID, PNT_SEQ, PNT_DATE, PNT_POINT)
+		VALUES(#{pnt_id}, (SELECT NVL(MAX(PNT_SEQ),0)+1 FROM POINT), SYSDATE , #{pnt_point})
+</insert>
+	
+<!-- 예약포인트 차감 -->
+<insert id="usePntOnResrv">
+	INSERT INTO POINT
+		(PNT_ID, PNT_SEQ, PNT_DATE, PNT_POINT)
+		VALUES(#{pnt_id},(SELECT NVL(MAX(PNT_SEQ),0)+1 FROM POINT) , SYSDATE , -3000)
+</insert>
+
+<!-- 빠른문의 포인트 차감 -->
+<insert id="usePntOnBoard">
+	INSERT INTO POINT
+		(PNT_ID, PNT_SEQ, PNT_DATE, PNT_POINT)
+		VALUES(#{pnt_id},(SELECT NVL(MAX(PNT_SEQ),0)+1 FROM POINT) , SYSDATE , -500)
+</insert>
+
+<!-- 일반사용자 아이디별 총 포인트 조회 -->
+<select id="selectAllPnt" resultType="java.lang.Integer">
+	SELECT NVL(SUM(PNT_POINT),0)  AS PNT_SUM 
+		FROM POINT p 
+		WHERE PNT_ID =#{pnt_id}
+</select>
+
+<!-- 일반사용자 아이디별 총 포인트 적립 내역 조회 -->
+<select id="selectPntList" resultType="com.min.edu.vo.Point_VO">
+	SELECT PNT_ID , PNT_DATE , PNT_POINT 
+		FROM POINT
+		WHERE PNT_ID =#{pnt_id}
+		ORDER BY PNT_DATE DESC
+</select>
+</mapper>

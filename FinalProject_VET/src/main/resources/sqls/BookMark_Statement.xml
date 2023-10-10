@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.min.edu.model.mapper.BookMark_DaoImpl">
+
+	<resultMap type="com.min.edu.vo.BookMark_VO" id="BookMarkVoMap">
+		<result column="BM_USERSID" property="bm_usersid"/>
+		<result column="BM_HOSPID" property="bm_hospid"/>
+		
+		<collection property="hospital_vo" resultMap="HospitalVoMap"/>
+	</resultMap>
+	
+	<resultMap type="com.min.edu.vo.Hospital_VO" id="HospitalVoMap">
+		<result column="HOSP_ID" property="hosp_id"/>
+		<result column="HOSP_NAME" property="hosp_name"/>
+	</resultMap>
+
+	<!-- 일반사용자의 즐겨찾기 병원개수 조회 -->
+	<select id="countBookmark" resultType="java.lang.Integer">
+		SELECT NVL(COUNT(BM_HOSPID),0) AS CNT
+			FROM BOOKMARK
+			WHERE BM_USERSID = #{bm_usersid}
+	</select>
+	
+	<!-- 일반사용자별 즐겨찾기 병원 리스트 조회 -->
+	<select id="selectAllBookmark" resultMap="BookMarkVoMap">
+		SELECT b.BM_HOSPID , b.BM_USERSID, h.HOSP_NAME, h.HOSP_ID
+			FROM BOOKMARK b
+			JOIN HOSPITAL h ON h.HOSP_ID  = b.BM_HOSPID 
+			WHERE b.BM_USERSID = #{bm_usersid}
+	</select>
+	
+	<!-- 일반사용자의 즐겨찾기 병원 등록 -->
+	<insert id="insertNewBookmark" parameterType="com.min.edu.vo.BookMark_VO">
+		INSERT INTO BOOKMARK
+			(BM_USERSID, BM_HOSPID)
+			VALUES(#{bm_usersid}, #{bm_hospid})
+	</insert>
+	
+	<!-- 일반사용자의 즐겨찾기 병원 삭제 -->
+	<delete id="deleteBookmark" parameterType="com.min.edu.vo.BookMark_VO">
+		DELETE FROM BOOKMARK
+			WHERE BM_USERSID= #{bm_usersid} 
+			AND BM_HOSPID= #{bm_hospid}
+	</delete>
+
+	<!-- 일반사용자의 즐겨찾기 목록중 일치하는 병원있는지 확인 -->
+	<select id="bookMarkYorN" parameterType="java.util.Map" resultType="java.lang.Integer">
+		SELECT COUNT(*)
+			FROM BOOKMARK
+			WHERE BM_USERSID =#{bm_usersid}
+			AND BM_HOSPID =#{bm_hospid}
+	</select>
+</mapper>

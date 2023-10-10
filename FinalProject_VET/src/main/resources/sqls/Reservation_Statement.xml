@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.min.edu.model.mapper.Reservation_DaoImpl">
+
+	<resultMap type="com.min.edu.vo.Hospital_VO" id="hospital_VO">
+		<result column="HOSP_ID" property="hosp_id"/>
+		<result column="HOSP_NAME" property="hosp_name"/>
+		<result column="HOSP_TIME" property="hosp_time"/>
+		<result column="HOSP_OFF" property="hosp_off"/>
+		<result column="HOSP_PARK" property="hosp_park"/>
+		<result column="HOSP_ETC" property="hosp_etc"/>
+		
+		<collection property="reservation_vo" resultMap="resrv_VO"/>
+	</resultMap>
+	
+	<resultMap type="com.min.edu.vo.Reservation_VO" id="resrv_VO">
+		<result column="RESRV_NUM" property="resrv_num"/>
+		<result column="RESRV_HOPS" property="resrv_hops"/>
+		<result column="RESRV_VISIT" property="resrv_visit"/>
+		<result column="RESRV_TIME" property="resrv_time"/>
+		<result column="RESRV_NAME" property="resrv_name"/>
+		<result column="RESRV_TEL" property="resrv_tel"/>
+		<result column="RESRV_MEMO" property="resrv_memo"/>
+		<result column="RESRV_STATUS" property="resrv_status"/>
+		<result column="RESRV_REGDATE" property="resrv_regdate"/>
+		<result column="RESRV_USERID" property="resrv_userid"/>
+	</resultMap>
+
+	<select id="resrv_monthYNCount" resultType="java.util.Map">
+		SELECT  MM, NVL(Y_COUNT, 0) AS Y_COUNT
+			FROM(
+				SELECT "MONTH", COUNT(*) AS Y_COUNT
+					FROM (
+						SELECT TO_CHAR(RESRV_VISIT, 'MM') AS "MONTH" , RESRV_HOPS ,  RESRV_STATUS 
+							FROM RESERVATION r 
+							WHERE TO_CHAR(RESRV_VISIT, 'YYYY') = #{yyyy}
+								AND RESRV_STATUS ='Y'
+								AND RESRV_HOPS = #{RESRV_HOPS}
+					)
+					GROUP BY "MONTH"
+				) M1
+			RIGHT JOIN 
+				(SELECT LPAD(LEVEL,2,0) MM
+					FROM DUAL
+					<![CDATA[
+						CONNECT BY LEVEL <=12) M2
+					]]>
+			ON M1."MONTH" = M2.MM
+			ORDER BY MM
+	</select>
+	
+	<select id="resrv_ResrvLists" resultType="Reservation_VO">
+		SELECT RESRV_VISIT , RESRV_NUM, RESRV_NAME
+			FROM (SELECT TO_CHAR(RESRV_VISIT,'YYYY-MM-DD')||'T'||RESRV_TIME||':00:00' AS RESRV_VISIT, RESRV_NUM, RESRV_NAME, RESRV_STATUS, RESRV_HOPS  
+					FROM RESERVATION r) 
+			WHERE RESRV_HOPS = #{resrv_hops}
+				AND RESRV_STATUS = 'Y'
+	</select>
+	
+	<select id="resrv_detail" resultType="Reservation_VO">
+		SELECT RESRV_NUM, RESRV_NAME, RESRV_TEL, 
+				RESRV_HOPS ,TO_CHAR(RESRV_VISIT,'YYYY-MM-DD') AS RESRV_VISIT, RESRV_TIME, 
+				RESRV_MEMO , RESRV_STATUS, RESRV_USERID
+			FROM RESERVATION r 
+				WHERE RESRV_NUM = #{resrv_num}
+	</select>
+	
+	<select id="resrv_dayStatus" resultType="Reservation_VO">
+		SELECT RESRV_NUM, TO_CHAR(RESRV_VISIT,'YYYY-MM-DD') AS RESRV_VISIT, RESRV_TIME, 
+				RESRV_NAME, RESRV_STATUS, TO_CHAR(RESRV_REGDATE,'YYYY-MM-DD HH24:MI:SS') AS RESRV_REGDATE,
+				RESRV_USERID
+			FROM RESERVATION r 
+			WHERE RESRV_HOPS = #{resrv_hops}
+				AND RESRV_STATUS = #{resrv_status}
+				ORDER BY RESRV_VISIT 
+	</select>
+	
+	<insert id="resrv_insert">
+		<selectKey keyProperty="resrv_num" resultType="java.lang.String" order="BEFORE">
+				SELECT CONCAT('RSV',NVL(MAX(TO_NUMBER(SUBSTR(RESRV_NUM, 4))),0)+1) AS RESRV_NUM FROM RESERVATION r
+		</selectKey>
+		INSERT INTO RESERVATION (RESRV_NUM, 
+						RESRV_HOPS, RESRV_VISIT, RESRV_TIME, 
+						RESRV_NAME, RESRV_TEL, RESRV_MEMO, 
+						RESRV_STATUS, RESRV_REGDATE, RESRV_USERID) 
+			VALUES(#{resrv_num}, 
+					#{resrv_hops}, #{resrv_visit}, #{resrv_time}, 
+					#{resrv_name}, #{resrv_tel}, #{resrv_memo}, 
+					'W',(SYSDATE), #{resrv_userid})
+	</insert>
+	
+	<update id="resrv_updateToY">
+		UPDATE RESERVATION 
+			SET RESRV_STATUS = 'Y'  
+				WHERE RESRV_NUM = #{resrv_num}
+	</update>
+	
+	<update id="resrv_updateToN">
+		UPDATE RESERVATION 
+			SET RESRV_STATUS = 'N'  
+				WHERE RESRV_NUM = #{resrv_num}
+	</update>
+	
+	<update id="resrv_updateToX">
+		UPDATE RESERVATION 
+			SET RESRV_STATUS = 'X'  
+				WHERE RESRV_NUM = #{resrv_num}
+	</update>
+	
+	<delete id="resrv_delete">
+		DELETE FROM RESERVATION WHERE RESRV_NUM = #{resrv_num}
+	</delete>
+	
+	<select id="resrv_reqPage" resultMap="hospital_VO">
+		SELECT HOSP_TIME, HOSP_OFF, r.RESRV_NUM , 
+				TO_CHAR(r.RESRV_VISIT,'YYYY-MM-DD')||'T'||r.RESRV_TIME||':00:00' AS RESRV_VISIT,
+				r.RESRV_TIME , r.RESRV_STATUS 
+			FROM HOSPITAL h LEFT JOIN RESERVATION r
+			ON h.HOSP_ID = r.RESRV_HOPS 
+			WHERE HOSP_ID = #{hosp_id}
+				AND r.RESRV_STATUS IN ('Y','W')
+				AND  r.RESRV_VISIT > (SELECT TO_CHAR(SYSDATE -1,'YYYY-MM-DD')  
+									FROM DUAL)
+			ORDER BY r.RESRV_VISIT ASC
+	</select>
+	
+	<select id="resrv_reqCal" resultType="Reservation_VO">
+		SELECT TO_CHAR(RESRV_VISIT,'YYYY-MM-DD')||'T'||r.RESRV_TIME||':00:00' AS RESRV_VISIT, RESRV_NUM 
+			FROM RESERVATION r
+			WHERE RESRV_VISIT > (SELECT TO_CHAR(SYSDATE -1,'YYYY-MM-DD')  
+									FROM DUAL)
+				AND (RESRV_STATUS = 'Y' OR RESRV_STATUS = 'W')
+				AND RESRV_HOPS = #{resrv_hops}
+			ORDER BY RESRV_VISIT ASC
+	</select>
+	
+	<select id="resrv_resultNum" resultType="java.lang.String">
+		SELECT CONCAT('RSV',NVL(MAX(TO_NUMBER(SUBSTR(RESRV_NUM, 4))),0)) AS RESRV_NUM 
+			FROM RESERVATION r 
+	</select>
+	
+	<select id="resrv_scheduler" resultType="Reservation_VO">
+		SELECT RESRV_NUM ,RESRV_REGDATE , RESRV_USERID 
+			FROM RESERVATION r 
+			WHERE RESRV_STATUS = 'W'
+			AND (SYSTIMESTAMP - RESRV_REGDATE) > INTERVAL '2'HOUR
+	</select>
+	
+	<select id="resrv_recordList" resultType="Reservation_VO">
+		SELECT RESRV_NUM , RESRV_HOPS , RESRV_VISIT , 
+				RESRV_TIME , RESRV_NAME , RESRV_MEMO ,
+				RESRV_STATUS
+			FROM (SELECT RESRV_NUM , RESRV_HOPS , TO_CHAR(RESRV_VISIT,'YYYY-MM-DD') AS RESRV_VISIT , 
+						RESRV_TIME , RESRV_NAME , RESRV_MEMO , 
+						RESRV_STATUS , ROW_NUMBER () OVER(ORDER BY r.RESRV_REGDATE DESC) RN
+					FROM RESERVATION r
+					WHERE RESRV_USERID = #{resrv_userid})
+			WHERE RN BETWEEN #{first} AND #{last}
+	</select>
+	
+	<select id="resrv_recordListCnt" resultType="java.lang.Integer">
+		SELECT COUNT(*) 
+			FROM RESERVATION r 
+			WHERE RESRV_USERID = #{resrv_userid}
+	</select>
+	
+	<!-- 병원이름 가져오기 -->
+	<select id="hosp_name" resultType="String">
+		SELECT HOSP_NAME 
+			FROM HOSPITAL h 
+			WHERE HOSP_ID = #{hosp_id}
+	</select>
+	
+	<!-- 예약정보 없는 병원 운영시간, 휴무일 가져오기 -->
+	<select id="hosp_runTime" resultMap="hospital_VO">
+		SELECT HOSP_TIME, HOSP_OFF
+			FROM HOSPITAL h 
+			WHERE HOSP_ID = #{hosp_id}
+	</select>
+	
+	<update id="resrv_detailModify">
+		UPDATE PROJECT.RESERVATION
+			SET RESRV_VISIT=#{resrv_visit}, RESRV_TIME=#{resrv_time}, 
+				RESRV_NAME=#{resrv_name}, RESRV_TEL=#{resrv_tel}, RESRV_MEMO=#{resrv_memo}
+			WHERE RESRV_NUM=#{resrv_num}
+	</update>
+	
+</mapper>

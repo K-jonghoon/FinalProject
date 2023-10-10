@@ -1,0 +1,222 @@
+@charset "UTF-8";
+
+#detailContainer {
+		width: 1000px;
+		min-height: 900px;
+		height: 900px auto;
+		margin: 0px auto;
+   		padding: 0px;
+}
+
+#searchArea {
+	height: 40px;
+	margin: 10px 10px;
+}
+
+#contentArea {
+	height: 800px;
+	max-height: 800px;
+	
+}
+#replyArea {
+	height: 400px auto;
+	
+}
+
+#writeReplyArea {
+	margin-bottom: 40px;
+	display: none;
+}
+
+#pagingArea {
+	height: 50px;
+	margin: 10px 10px;
+	display: flex;
+	justify-content: center;
+}
+
+#formQuest{
+	width: 800px; 
+	float: left;
+}
+
+.basicBtn{
+	background-color: #D7CCC8;
+	width: 110px;
+	height: 20px;
+	border-radius: 5px;
+	font: #3E2723;
+	border: none;
+	box-shadow: 1.5px 1.5px 1.5px 0 #3E2723;
+}
+
+
+.pages {
+	display: flex;
+    justify-content: center;
+}
+
+.pages li{
+    font-size: 20px;
+    margin-right: 20px;
+
+}
+
+#gapArea{
+	height: 40px;
+}
+
+#choiceBtn{
+	margin: 15px 15px;
+	color: red;
+}
+
+.questCard{
+	padding: 15px 15px;
+	margin: 10px;
+	min-height: 300px;
+	background-color: #F5F1EF;
+	border-radius: 20px;
+	box-shadow: 8px 6px #BCAAA4;
+}
+
+.card-chosen{
+	padding: 15px 15px;
+	margin-bottom: 20px;
+	background-color: #F5F1EF;
+	border-radius: 20px;
+	box-shadow: 8px 6px #900020;
+}
+.card {
+	padding: 15px 15px;
+	margin-bottom: 20px;
+	background-color: #F5F1EF;
+	border-radius: 20px;
+	box-shadow: 8px 6px #BCAAA4;
+}
+
+.blank{
+	padding: 5px;
+}
+
+.questTop {
+	padding: 5px;
+	margin: 0px 10px;
+}
+.questBottom{
+	padding: 10px;
+/* 	margin: 0px 10px; */
+	width: 900px;
+	overflow:hidden;
+	
+	max-height: 3.0em;
+    word-wrap: break-word;
+	white-space: normal;
+    line-height: 1.2;
+    height: 3.6em;
+    text-align: left;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.replyBottom{
+	padding: 10px;
+	width: 900px;
+	overflow:hidden;
+    word-wrap: break-word;
+	white-space: normal;
+    line-height: 1.2;
+    text-align: left;
+/*     display: -webkit-box; */
+/*     -webkit-line-clamp: 3; */
+/*     -webkit-box-orient: vertical; */
+}
+
+.thumbnail{
+	width: 50px;
+}
+
+.questId{
+	width: 80px;
+	text-align: left;
+}
+
+.questCategory{
+	width: 65px;
+	text-align: center;
+}
+.questPart{
+	width: 120px;
+	text-align: center;
+}
+	
+.questTitle{
+	width: 590px; 
+	
+}
+
+.questDate{
+	width: 200px;
+	text-align: right;
+}
+
+.replyTitle{
+	width: 750px;
+	text-align: left;
+}
+
+.modal {
+  display: none; 
+  position: fixed; 
+  z-index: 1; 
+  padding-top: 100px; 
+  left: 0;
+  top: 0;
+  width: 100%; 
+  height: 100%; 
+  overflow: auto; 
+  background-color: rgb(0,0,0); 
+  background-color: rgba(0,0,0,0.4); 
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 40%;
+}
+
+#writeReplyHere{
+	width: 1000px;
+	height: 300px; 
+}
+
+/* The Close Button */
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+
+figure[class='image']>img{
+
+/*     object-fit: contain; */
+    max-width: 600x;
+}
+
+
+

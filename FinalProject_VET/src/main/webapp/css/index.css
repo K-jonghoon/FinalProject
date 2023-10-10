@@ -1,0 +1,58 @@
+@charset "UTF-8";
+
+#container{
+	width: 800px;
+	margin: 50px auto;
+}
+
+#container>h1, #container>h3{
+	margin: 0px;
+}
+
+#container>h1{
+	text-align: center;
+}
+
+#container>h3{
+	text-align: right;
+}
+
+.btn {
+	float: right;
+	width: 100px;
+	padding-right: 0px;
+}
+
+.btn input {
+	width: 100%;
+	padding: 0px;
+	border: 1px solid grey;
+}
+
+.btn input:hover {
+	cursor: pointer;
+}
+
+ul{
+	list-style: none;
+}
+
+a {
+	text-decoration: none;
+	color: gray;
+/* 	border-bottom: 1px solid gray; */
+}
+
+#list{
+	width: 200px;
+	margin: 0 auto;
+	text-align: left;
+}
+
+.ck-content {
+	height: 400px;
+}
+
+.ck-editor__editable {
+    max-height: 400px;
+}
